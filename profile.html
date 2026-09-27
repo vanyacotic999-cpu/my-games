@@ -200,7 +200,6 @@
     }
     .delete-account-btn:hover { background: #f38ba8; color: #1e1e2e; }
 
-    /* МОДАЛЬНОЕ ОКНО */
     .modal-overlay {
       position: fixed; inset: 0; background: rgba(0,0,0,0.7);
       display: none; justify-content: center; align-items: center;
@@ -211,11 +210,6 @@
       background: #16213e; border: 2px solid #0f3460;
       border-radius: 20px; padding: 30px; max-width: 420px;
       width: 100%; box-shadow: 0 0 50px rgba(0,0,0,0.8);
-      animation: popIn 0.3s ease;
-    }
-    @keyframes popIn {
-      from { transform: scale(0.85); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
     }
     .modal h3 {
       font-size: 20px; color: #a6e3a1;
@@ -273,7 +267,6 @@
     <h1 id="pageTitle">👤 Вход</h1>
   </div>
 
-  <!-- ЭКРАН ВХОДА -->
   <div class="profile-card login-screen" id="loginScreen">
     <h2 class="section-title">Выбери аккаунт</h2>
     <div class="accounts-list" id="accountsList"></div>
@@ -299,7 +292,6 @@
     <button class="guest-btn" id="guestBtn">👤 Войти как Гость</button>
   </div>
 
-  <!-- ЭКРАН ПРОФИЛЯ -->
   <div id="profileScreen" style="display:none; width:100%; max-width:700px;">
     <div class="profile-card">
       <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
@@ -383,7 +375,6 @@
     Не используй важные пароли (от почты, соцсетей).
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal">
       <h3 id="modalTitle"></h3>
@@ -441,7 +432,7 @@
         const chip = document.createElement('button');
         chip.className = 'account-chip';
         const avatar = localStorage.getItem('acc_' + acc.name + '_player_avatar') || (acc.isGuest ? '👤' : '🙂');
-        chip.innerHTML = `<span class="chip-avatar">${avatar}</span><span>${acc.name}</span>`;
+        chip.innerHTML = '<span class="chip-avatar">' + avatar + '</span><span>' + acc.name + '</span>';
         if (acc.isGuest) {
           chip.innerHTML += ' <span style="color:#888;font-size:12px">(без пароля)</span>';
         } else {
@@ -575,9 +566,7 @@
       showToast('✅ Сохранено');
     });
 
-    // ============================================
-    // МОДАЛЬНОЕ ОКНО
-    // ============================================
+    // === МОДАЛЬНОЕ ОКНО ===
     const modalOverlay = document.getElementById('modalOverlay');
     const modalTitle = document.getElementById('modalTitle');
     const modalText = document.getElementById('modalText');
@@ -588,14 +577,14 @@
 
     let modalOnConfirm = null;
 
-    function openModal({ title, text, inputs, onConfirm, confirmText, confirmClass }) {
-      modalTitle.textContent = title;
-      modalText.textContent = text || '';
+    function openModal(opts) {
+      modalTitle.textContent = opts.title;
+      modalText.textContent = opts.text || '';
       modalInputs.innerHTML = '';
       modalError.textContent = '';
 
-      if (inputs) {
-        inputs.forEach(inp => {
+      if (opts.inputs) {
+        opts.inputs.forEach(inp => {
           const el = document.createElement('input');
           el.type = inp.type || 'text';
           el.placeholder = inp.placeholder || '';
@@ -605,9 +594,9 @@
         });
       }
 
-      modalConfirm.textContent = confirmText || 'OK';
-      modalConfirm.className = confirmClass === 'primary' ? 'modal-btn-primary' : 'modal-btn-confirm';
-      modalOnConfirm = onConfirm;
+      modalConfirm.textContent = opts.confirmText || 'OK';
+      modalConfirm.className = opts.confirmClass === 'primary' ? 'modal-btn-primary' : 'modal-btn-confirm';
+      modalOnConfirm = opts.onConfirm;
 
       modalOverlay.classList.add('show');
 
@@ -734,4 +723,22 @@
 
     // === ТОСТ ===
     function showToast(text, isError) {
-      const toast
+      const toast = document.getElementById('toast');
+      toast.textContent = text;
+      if (isError) {
+        toast.classList.add('error');
+      } else {
+        toast.classList.remove('error');
+      }
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // === СТАРТ ===
+    renderAccountsList();
+  </script>
+
+  <script src="tracker.js"></script>
+
+</body>
+</html>
