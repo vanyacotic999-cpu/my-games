@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Мой игровой сайт</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #1a1a2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+      background: linear-gradient(90deg, #a6e3a1, #89b4fa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-align: center;
+    }
+    .subtitle {
+      color: #888;
+      margin-bottom: 40px;
+      font-size: 16px;
+    }
+    .games {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .game-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 200px;
+      height: 220px;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 15px;
+      text-decoration: none;
+      color: #fff;
+      transition: all 0.3s;
+      box-shadow: 0 0 20px rgba(15, 52, 96, 0.5);
+    }
+    .game-card:hover {
+      transform: translateY(-8px);
+      border-color: #a6e3a1;
+      box-shadow: 0 0 30px rgba(166, 227, 161, 0.6);
+    }
+    .game-card .icon {
+      font-size: 60px;
+      margin-bottom: 15px;
+    }
+    .game-card .name {
+      font-size: 20px;
+      font-weight: bold;
+      color: #a6e3a1;
+    }
+    .game-card .desc {
+      font-size: 13px;
+      color: #888;
+      margin-top: 5px;
+    }
+
+    /* Футер с копирайтом и скромной поддержкой */
+    .footer {
+      margin-top: 30px;
+      color: #555;
+      font-size: 13px;
+      text-align: center;
+    }
+    .support-link {
+      color: #666;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .support-link:hover {
+      color: #a6e3a1;
+      text-decoration: underline;
+    }
+
+    /* Профиль — виджет */
+    .profile-widget {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 100;
+    }
+    .profile-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 16px;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 30px;
+      text-decoration: none;
+      color: #fff;
+      font-size: 15px;
+      transition: all 0.2s;
+      box-shadow: 0 0 20px rgba(15, 52, 96, 0.6);
+    }
+    .profile-link:hover {
+      border-color: #a6e3a1;
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(166, 227, 161, 0.4);
+    }
+    .profile-avatar { font-size: 24px; }
+    .profile-name {
+      font-weight: bold;
+      color: #a6e3a1;
+    }
+
+    /* Виджет времени */
+    .time-widget {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 12px;
+      padding: 10px 18px;
+      font-size: 14px;
+      color: #cdd6f4;
+      box-shadow: 0 0 20px rgba(15, 52, 96, 0.7);
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="profile-widget">
+    <a href="profile.html" class="profile-link">
+      <span class="profile-avatar" id="profileAvatar">😎</span>
+      <span class="profile-name" id="profileName">Игрок</span>
+    </a>
+  </div>
+
+  <h1>🎮 Мой игровой сайт</h1>
+  <p class="subtitle">Выбери игру и играй</p>
+
+  <div class="games">
+    <a href="snake.html" class="game-card">
+      <div class="icon">🐍</div>
+      <div class="name">Змейка</div>
+      <div class="desc">Собирай яблоки</div>
+    </a>
+    <a href="apples.html" class="game-card">
+      <div class="icon">🍎</div>
+      <div class="name">Ловец яблок</div>
+      <div class="desc">Лови и уворачивайся</div>
+    </a>
+    <a href="tetris.html" class="game-card">
+      <div class="icon">🎮</div>
+      <div class="name">Тетрис</div>
+      <div class="desc">Классика жанра</div>
+    </a>
+  </div>
+
+  <div class="footer">
+    © 2026 Мой сайт ·
+    <a href="https://vtb.paymo.ru/collect-money/qr/?transaction=adab400a-8575-4ae1-8591-303dabcc8344" target="_blank" class="support-link">
+      💖 Поддержать
+    </a>
+  </div>
+
+  <div class="time-widget" id="timeWidget">⏱ <span style="color:#a6e3a1">0 сек</span></div>
+
+  <script src="accounts.js"></script>
+  <script src="tracker.js"></script>
+
+  <script>
+    // === ПОДГРУЗКА ПРОФИЛЯ НА ГЛАВНУЮ ===
+    if (window.Accounts) {
+      const avatar = Accounts.get('player_avatar') || '😎';
+      const name = Accounts.get('player_name') || Accounts.getActive();
+      document.getElementById('profileAvatar').textContent = avatar;
+      document.getElementById('profileName').textContent = name;
+    }
+  </script>
+
+</body>
+</html>
