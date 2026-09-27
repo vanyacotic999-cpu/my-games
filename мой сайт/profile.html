@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Профиль</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1a2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      min-height: 100vh;
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .back-link {
+      padding: 8px 16px;
+      background: #45475a;
+      color: #cdd6f4;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 14px;
+    }
+    .back-link:hover { background: #585b70; }
+    h1 { font-size: 28px; color: #a6e3a1; }
+
+    .profile-card {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 20px;
+      padding: 30px 40px;
+      box-shadow: 0 0 40px rgba(15, 52, 96, 0.9);
+      max-width: 700px;
+      width: 100%;
+      margin-bottom: 25px;
+    }
+
+    .section-title {
+      font-size: 22px;
+      color: #a6e3a1;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    /* ЭКРАН ВХОДА */
+    .login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .accounts-list {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .account-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 20px;
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 25px;
+      font-size: 16px;
+      color: #cdd6f4;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .account-chip:hover {
+      background: #313244;
+      transform: translateY(-2px);
+      border-color: #89b4fa;
+    }
+    .account-chip .chip-avatar { font-size: 22px; }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 350px;
+      margin-top: 15px;
+    }
+    .login-form input {
+      padding: 12px 16px;
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      text-align: center;
+    }
+    .login-form input:focus { outline: none; border-color: #89b4fa; }
+    .login-form button {
+      padding: 12px;
+      background: #89b4fa;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .login-form button:hover { background: #74a8f0; }
+    .login-form .cancel {
+      background: #45475a;
+      color: #cdd6f4;
+      font-size: 14px;
+    }
+    .login-form .cancel:hover { background: #585b70; }
+
+    .login-error {
+      color: #f38ba8;
+      font-size: 14px;
+      text-align: center;
+      min-height: 20px;
+    }
+    .selected-name {
+      color: #89b4fa;
+      font-weight: bold;
+      text-align: center;
+      font-size: 18px;
+    }
+
+    /* ФОРМА СОЗДАНИЯ */
+    .create-form {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+      width: 100%;
+      max-width: 400px;
+    }
+    .create-form input {
+      padding: 10px 14px;
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+      font-family: inherit;
+    }
+    .create-form input:focus { outline: none; border-color: #89b4fa; }
+    .create-form button {
+      padding: 12px;
+      background: #a6e3a1;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 15px;
+    }
+    .create-form button:hover { background: #94e2d5; }
+    .divider {
+      color: #555;
+      font-size: 13px;
+      margin: 15px 0 5px;
+      text-align: center;
+    }
+
+    .guest-btn {
+      padding: 10px 20px;
+      background: #45475a;
+      color: #cdd6f4;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    .guest-btn:hover { background: #585b70; }
+
+    /* ПРОФИЛЬ */
+    .logout-btn {
+      display: block;
+      margin: 0 auto 15px;
+      padding: 8px 20px;
+      background: #f38ba8;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-family: inherit;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .logout-btn:hover { background: #eba0ac; }
+
+    .profile-top {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+      margin-bottom: 25px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .avatar-display {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: #1e1e2e;
+      border: 4px solid #89b4fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 60px;
+      box-shadow: 0 0 25px rgba(137, 180, 250, 0.5);
+    }
+    .profile-info { flex: 1; min-width: 250px; }
+    .profile-info label {
+      display: block;
+      font-size: 13px;
+      color: #888;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .name-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 18px;
+      font-family: inherit;
+      font-weight: bold;
+    }
+    .name-input:focus { outline: none; border-color: #89b4fa; }
+
+    .avatar-picker { margin-top: 20px; }
+    .avatar-picker h3 {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .avatar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+      gap: 10px;
+    }
+    .avatar-option {
+      width: 55px;
+      height: 55px;
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 12px;
+      font-size: 28px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      padding: 0;
+    }
+    .avatar-option:hover { background: #313244; transform: scale(1.1); }
+    .avatar-option.active {
+      background: #89b4fa;
+      border-color: #a6e3a1;
+      box-shadow: 0 0 15px rgba(166, 227, 161, 0.6);
+    }
+
+    .records-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+    .record-card {
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 15px;
+      padding: 20px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    .record-card:hover { border-color: #89b4fa; transform: translateY(-4px); }
+    .record-icon { font-size: 45px; margin-bottom: 10px; }
+    .record-name {
+      font-size: 14px;
+      color: #888;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .record-value { font-size: 32px; font-weight: bold; color: #a6e3a1; }
+    .record-best { font-size: 12px; color: #f9e2af; margin-top: 6px; }
+
+    .save-btn {
+      margin-top: 20px;
+      width: 100%;
+      padding: 15px;
+      background: #a6e3a1;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .save-btn:hover { background: #94e2d5; }
+
+    .action-btn {
+      margin-top: 10px;
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: bold;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .change-pass-btn {
+      background: #89b4fa;
+      color: #1e1e2e;
+    }
+    .change-pass-btn:hover { background: #74a8f0; }
+
+    .reset-btn {
+      background: #fab387;
+      color: #1e1e2e;
+    }
+    .reset-btn:hover { background: #f9a86a; }
+
+    .delete-account-btn {
+      background: transparent;
+      color: #f38ba8;
+      border: 2px solid #f38ba8;
+    }
+    .delete-account-btn:hover { background: #f38ba8; color: #1e1e2e; }
+
+    /* МОДАЛЬНОЕ ОКНО */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+      padding: 20px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 420px;
+      width: 100%;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      animation: popIn 0.3s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal h3 {
+      font-size: 20px;
+      color: #a6e3a1;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .modal p {
+      font-size: 14px;
+      color: #cdd6f4;
+      margin-bottom: 20px;
+      text-align: center;
+      line-height: 1.5;
+    }
+    .modal p.warning {
+      color: #f38ba8;
+      font-weight: bold;
+    }
+    .modal input {
+      width: 100%;
+      padding: 12px 16px;
+      background: #1e1e2e;
+      border: 2px solid #313244;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-family: inherit;
+      margin-bottom: 12px;
+    }
+    .modal input:focus { outline: none; border-color: #89b4fa; }
+    .modal .error {
+      color: #f38ba8;
+      font-size: 13px;
+      text-align: center;
+      margin-bottom: 10px;
+      min-height: 18px;
+    }
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .modal-buttons button {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-family: inherit;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .modal-btn-cancel {
+      background: #45475a;
+      color: #cdd6f4;
+    }
+    .modal-btn-cancel:hover { background: #585b70; }
+    .modal-btn-confirm {
+      background: #f38ba8;
+      color: #1e1e2e;
+    }
+    .modal-btn-confirm:hover { background: #eba0ac; }
+    .modal-btn-primary {
+      background: #89b4fa;
+      color: #1e1e2e;
+    }
+    .modal-btn-primary:hover { background: #74a8f0; }
+
+    .toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #a6e3a1;
+      color: #1e1e2e;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      opacity: 0;
+      transition: all 0.4s;
+      z-index: 3000;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast.error { background: #f38ba8; }
+
+    .hint {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #555;
+      text-align: center;
+      line-height: 1.6;
+      max-width: 600px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <a href="index.html" class="back-link">← На главную</a>
+    <h1 id="pageTitle">👤 Вход</h1>
+  </div>
+
+  <!-- ЭКРАН ВХОДА -->
+  <div class="profile-card login-screen" id="loginScreen">
+    <h2 class="section-title">Выбери аккаунт</h2>
+    <div class="accounts-list" id="accountsList"></div>
+
+    <div class="login-form" id="loginForm" style="display:none">
+      <div class="selected-name" id="selectedName"></div>
+      <input type="password" id="passwordInput" placeholder="Введи пароль" maxlength="30">
+      <button id="loginBtn">🚪 Войти</button>
+      <button class="cancel" id="cancelLoginBtn">← Другой аккаунт</button>
+      <div class="login-error" id="loginError"></div>
+    </div>
+
+    <div class="divider">─── или ───</div>
+
+    <div class="create-form">
+      <input type="text" id="newNameInput" placeholder="Имя нового аккаунта" maxlength="15">
+      <input type="password" id="newPassInput" placeholder="Пароль (мин. 3 символа)" maxlength="30">
+      <button id="createAccountBtn">➕ Создать аккаунт</button>
+    </div>
+
+    <div class="divider">───</div>
+
+    <button class="guest-btn" id="guestBtn">👤 Войти как Гость</button>
+  </div>
+
+  <!-- ЭКРАН ПРОФИЛЯ -->
+  <div id="profileScreen" style="display:none; width:100%; max-width:700px;">
+    <div class="profile-card">
+      <button class="logout-btn" id="logoutBtn">🚪 Выйти из аккаунта</button>
+
+      <h2 class="section-title" id="welcomeTitle"></h2>
+
+      <div class="profile-top">
+        <div class="avatar-display" id="avatarDisplay">😎</div>
+        <div class="profile-info">
+          <label>Отображаемое имя</label>
+          <input type="text" class="name-input" id="nameInput" maxlength="20" placeholder="Введи имя...">
+        </div>
+      </div>
+
+      <div class="avatar-picker">
+        <h3>Выбери аватар</h3>
+        <div class="avatar-grid" id="avatarGrid"></div>
+      </div>
+
+      <button class="save-btn" id="saveBtn">💾 Сохранить профиль</button>
+    </div>
+
+    <div class="profile-card">
+      <h2 class="section-title">🏆 Рекорды</h2>
+      <div class="records-grid">
+        <div class="record-card">
+          <div class="record-icon">🐍</div>
+          <div class="record-name">Змейка</div>
+          <div class="record-value" id="recSnake">0</div>
+          <div class="record-best" id="recSnakeDate"></div>
+        </div>
+        <div class="record-card">
+          <div class="record-icon">🍎</div>
+          <div class="record-name">Ловец яблок</div>
+          <div class="record-value" id="recApples">0</div>
+          <div class="record-best" id="recApplesDate"></div>
+        </div>
+        <div class="record-card">
+          <div class="record-icon">🎮</div>
+          <div class="record-name">Тетрис</div>
+          <div class="record-value" id="recTetris">0</div>
+          <div class="record-best" id="recTetrisDate"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <h2 class="section-title">📊 Статистика</h2>
+      <div class="records-grid">
+        <div class="record-card">
+          <div class="record-icon">⏱</div>
+          <div class="record-name">Текущая сессия</div>
+          <div class="record-value" id="statSession" style="font-size:22px">0 сек</div>
+        </div>
+        <div class="record-card">
+          <div class="record-icon">📈</div>
+          <div class="record-name">Всего на сайте</div>
+          <div class="record-value" id="statTotal" style="font-size:22px">0 сек</div>
+        </div>
+        <div class="record-card">
+          <div class="record-icon">👣</div>
+          <div class="record-name">Визитов</div>
+          <div class="record-value" id="statVisits" style="font-size:22px">0</div>
+        </div>
+        <div class="record-card">
+          <div class="record-icon">📅</div>
+          <div class="record-name">Первый визит</div>
+          <div class="record-value" id="statFirst" style="font-size:16px">—</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="profile-card">
+      <button class="action-btn change-pass-btn" id="changePassBtn">🔑 Сменить пароль</button>
+      <button class="action-btn reset-btn" id="resetBtn">🗑 Сбросить рекорды</button>
+      <button class="action-btn delete-account-btn" id="deleteAccountBtn">❌ Удалить аккаунт</button>
+    </div>
+  </div>
+
+  <div class="hint">
+    🔐 Пароль хранится в браузере — это простая защита.<br>
+    Не используй важные пароли (от почты, соцсетей).
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3 id="modalTitle"></h3>
+      <p id="modalText"></p>
+      <div id="modalInputs"></div>
+      <div class="error" id="modalError"></div>
+      <div class="modal-buttons">
+        <button class="modal-btn-cancel" id="modalCancel">Отмена</button>
+        <button class="modal-btn-confirm" id="modalConfirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">✅ Готово!</div>
+
+  <script src="accounts.js"></script>
+
+  <script>
+    const AVATARS = ['😎', '🦊', '🐱', '🐶', '🐼', '🦁', '🐯', '🐸', '🐵', '🐧', '🦉', '🦄', '🐲', '👽', '🤖', '👾', '🎃', '⚡', '🔥', '💎', '🌟', '🚀', '🎮', '🏆'];
+
+    const loginScreen = document.getElementById('loginScreen');
+    const profileScreen = document.getElementById('profileScreen');
+    const accountsList = document.getElementById('accountsList');
+    const loginForm = document.getElementById('loginForm');
+    const selectedName = document.getElementById('selectedName');
+    const passwordInput = document.getElementById('passwordInput');
+    const loginError = document.getElementById('loginError');
+    const pageTitle = document.getElementById('pageTitle');
+
+    let currentAvatar = '😎';
+    let selectedAccountForLogin = null;
+    let loggedIn = false;
+
+    // === АВАТАРЫ ===
+    const avatarGrid = document.getElementById('avatarGrid');
+    AVATARS.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.className = 'avatar-option';
+      btn.textContent = emoji;
+      btn.dataset.avatar = emoji;
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.avatar-option').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentAvatar = emoji;
+        document.getElementById('avatarDisplay').textContent = emoji;
+      });
+      avatarGrid.appendChild(btn);
+    });
+
+    // === СПИСОК АККАУНТОВ ===
+    function renderAccountsList() {
+      accountsList.innerHTML = '';
+      const list = Accounts.getAll();
+      list.forEach(acc => {
+        const chip = document.createElement('button');
+        chip.className = 'account-chip';
+
+        const avatar = localStorage.getItem('acc_' + acc.name + '_player_avatar') || (acc.isGuest ? '👤' : '🙂');
+        chip.innerHTML = `<span class="chip-avatar">${avatar}</span><span>${acc.name}</span>`;
+
+        if (acc.isGuest) {
+          chip.innerHTML += ' <span style="color:#888;font-size:12px">(без пароля)</span>';
+        } else {
+          chip.innerHTML += ' 🔒';
+        }
+
+        chip.addEventListener('click', () => {
+          if (acc.isGuest) {
+            Accounts.setActive(acc.name);
+            enterProfile();
+          } else {
+            selectedAccountForLogin = acc.name;
+            selectedName.textContent = '👤 ' + acc.name;
+            passwordInput.value = '';
+            loginError.textContent = '';
+            loginForm.style.display = 'flex';
+            accountsList.style.display = 'none';
+            passwordInput.focus();
+          }
+        });
+
+        accountsList.appendChild(chip);
+      });
+    }
+
+    // === ВХОД ===
+    document.getElementById('loginBtn').addEventListener('click', () => {
+      if (!selectedAccountForLogin) return;
+      const pass = passwordInput.value;
+      const res = Accounts.checkPassword(selectedAccountForLogin, pass);
+
+      if (!res.ok) {
+        loginError.textContent = '❌ ' + res.msg;
+        passwordInput.value = '';
+        passwordInput.focus();
+        return;
+      }
+      Accounts.setActive(selectedAccountForLogin);
+      enterProfile();
+    });
+
+    passwordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('loginBtn').click();
+    });
+
+    document.getElementById('cancelLoginBtn').addEventListener('click', () => {
+      selectedAccountForLogin = null;
+      loginForm.style.display = 'none';
+      accountsList.style.display = 'flex';
+    });
+
+    // === СОЗДАНИЕ ===
+    document.getElementById('createAccountBtn').addEventListener('click', () => {
+      const name = document.getElementById('newNameInput').value;
+      const pass = document.getElementById('newPassInput').value;
+      const res = Accounts.create(name, pass, false);
+      if (!res.ok) {
+        showToast('❌ ' + res.msg, true);
+        return;
+      }
+      document.getElementById('newNameInput').value = '';
+      document.getElementById('newPassInput').value = '';
+      showToast('✅ Аккаунт «' + res.name + '» создан');
+      renderAccountsList();
+    });
+
+    document.getElementById('guestBtn').addEventListener('click', () => {
+      let guest = Accounts.find('Гость');
+      if (!guest) Accounts.create('Гость', '', true);
+      Accounts.setActive('Гость');
+      enterProfile();
+    });
+
+    // === ВХОД В ПРОФИЛЬ ===
+    function enterProfile() {
+      loggedIn = true;
+      loginScreen.style.display = 'none';
+      profileScreen.style.display = 'block';
+      pageTitle.textContent = '👤 Профиль';
+
+      if (!Accounts.get('player_name')) {
+        Accounts.set('player_name', Accounts.getActive());
+      }
+
+      loadProfile();
+      updateStats();
+    }
+
+    // === ВЫХОД ===
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      loggedIn = false;
+      selectedAccountForLogin = null;
+      profileScreen.style.display = 'none';
+      loginScreen.style.display = 'block';
+      loginForm.style.display = 'none';
+      accountsList.style.display = 'flex';
+      pageTitle.textContent = '👤 Вход';
+      renderAccountsList();
+      showToast('🚪 Вы вышли');
+    });
+
+    // === ЗАГРУЗКА ПРОФИЛЯ ===
+    function loadProfile() {
+      const name = Accounts.get('player_name') || Accounts.getActive();
+      const avatar

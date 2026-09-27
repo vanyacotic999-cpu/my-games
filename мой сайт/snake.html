@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Змейка 🐍</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1a2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      user-select: none;
+      transition: background 0.4s;
+    }
+    h1 { margin-bottom: 10px; font-size: 26px; }
+    .stats {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 15px;
+      font-size: 17px;
+    }
+    .stats span { color: #a6e3a1; font-weight: bold; }
+    canvas {
+      background: #16213e;
+      border: 3px solid #0f3460;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(15, 52, 96, 0.8);
+      max-width: 100%;
+      max-height: 70vh;
+      transition: background 0.3s, border 0.3s;
+    }
+    .hint { margin-top: 15px; font-size: 14px; color: #888; }
+
+    .menu {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 15px;
+      padding: 30px 40px;
+      box-shadow: 0 0 40px rgba(15, 52, 96, 0.9);
+      text-align: center;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .menu h2 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #a6e3a1;
+    }
+    .option {
+      margin-bottom: 18px;
+      text-align: left;
+    }
+    .option label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+      color: #cdd6f4;
+    }
+    .option .buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .option button {
+      flex: 1 1 auto;
+      min-width: 90px;
+      padding: 10px 12px;
+      background: #313244;
+      color: #cdd6f4;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .option button:hover { background: #45475a; }
+    .option button.active {
+      background: #89b4fa;
+      color: #1e1e2e;
+      font-weight: bold;
+      border-color: #a6e3a1;
+    }
+
+    /* Кнопки скинов — с цветовым индикатором */
+    .skin-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+    .skin-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid #cdd6f4;
+      flex-shrink: 0;
+    }
+    .skin-dot.classic { background: linear-gradient(135deg, #a6e3a1, #4a9d3f); }
+    .skin-dot.neon { background: linear-gradient(135deg, #ff79c6, #bd93f9); }
+    .skin-dot.fire { background: linear-gradient(135deg, #f9e2af, #f38ba8, #e64553); }
+    .skin-dot.ice { background: linear-gradient(135deg, #89dceb, #b4d7ff); }
+    .skin-dot.rainbow { background: linear-gradient(90deg, #ff5555, #ffb86c, #f1fa8c, #50fa7b, #8be9fd, #bd93f9); }
+
+    /* Кнопки тем — с превью цвета */
+    .theme-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+    .theme-preview {
+      width: 24px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid #cdd6f4;
+      flex-shrink: 0;
+    }
+    .theme-preview.dark { background: linear-gradient(135deg, #1a1a2e, #16213e); }
+    .theme-preview.black { background: linear-gradient(135deg, #000000, #111111); }
+    .theme-preview.forest { background: linear-gradient(135deg, #0d1f0d, #1a3a1a); }
+    .theme-preview.sunset { background: linear-gradient(135deg, #2d1b3d, #4a1f4a); }
+
+    /* Слайдер размера */
+    .size-slider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .size-slider input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: #313244;
+      outline: none;
+      cursor: pointer;
+      accent-color: #89b4fa;
+    }
+    .size-slider .value {
+      min-width: 60px;
+      text-align: center;
+      font-size: 15px;
+      color: #a6e3a1;
+      font-weight: bold;
+      background: #1e1e2e;
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid #45475a;
+    }
+
+    .start-btn {
+      margin-top: 15px;
+      width: 100%;
+      padding: 15px;
+      background: #a6e3a1;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .start-btn:hover {
+      background: #94e2d5;
+      transform: translateY(-2px);
+    }
+    .game-area { display: none; }
+    .game-area.visible { display: flex; flex-direction: column; align-items: center; }
+    .menu.hidden { display: none; }
+
+    .top-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .back-btn, .fullscreen-btn {
+      padding: 8px 20px;
+      background: #45475a;
+      color: #cdd6f4;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .back-btn:hover, .fullscreen-btn:hover { background: #585b70; }
+    .fullscreen-btn {
+      background: #89b4fa;
+      color: #1e1e2e;
+      font-weight: bold;
+    }
+    .fullscreen-btn:hover { background: #74a8f0; }
+
+    .game-area.fullscreen {
+      position: fixed;
+      inset: 0;
+      padding: 15px;
+      z-index: 9999;
+      justify-content: center;
+      overflow: auto;
+    }
+    .game-area.fullscreen canvas { max-height: 75vh; }
+    .game-area.fullscreen h1 { font-size: 22px; }
+  </style>
+</head>
+<body>
+
+  <div class="menu" id="menu">
+    <h2>🐍 Настройки игры</h2>
+
+    <div class="option">
+      <label>📐 Размер поля:</label>
+      <div class="buttons" id="sizeGroup">
+        <button data-size="10">Крошечное</button>
+        <button data-size="15">Маленькое</button>
+        <button data-size="20" class="active">Среднее</button>
+        <button data-size="25">Большое</button>
+        <button data-size="30">Огромное</button>
+        <button data-size="40">Гигантское</button>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>🎚 Свой размер (10–50):</label>
+      <div class="size-slider">
+        <input type="range" id="sizeRange" min="10" max="50" value="20" step="1">
+        <div class="value"><span id="sizeValue">20</span>×<span id="sizeValue2">20</span></div>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>🎨 Скин змейки:</label>
+      <div class="buttons" id="skinGroup">
+        <button data-skin="classic" class="active skin-btn"><span class="skin-dot classic"></span>Классика</button>
+        <button data-skin="neon" class="skin-btn"><span class="skin-dot neon"></span>Неон</button>
+        <button data-skin="fire" class="skin-btn"><span class="skin-dot fire"></span>Огонь</button>
+        <button data-skin="ice" class="skin-btn"><span class="skin-dot ice"></span>Лёд</button>
+        <button data-skin="rainbow" class="skin-btn"><span class="skin-dot rainbow"></span>Радуга</button>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>🌌 Тема фона:</label>
+      <div class="buttons" id="themeGroup">
+        <button data-theme="dark" class="active theme-btn"><span class="theme-preview dark"></span>Тёмная</button>
+        <button data-theme="black" class="theme-btn"><span class="theme-preview black"></span>Чёрная</button>
+        <button data-theme="forest" class="theme-btn"><span class="theme-preview forest"></span>Лес</button>
+        <button data-theme="sunset" class="theme-btn"><span class="theme-preview sunset"></span>Закат</button>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>🍎 Количество яблок:</label>
+      <div class="buttons" id="foodGroup">
+        <button data-food="1" class="active">1 яблоко</button>
+        <button data-food="3">3 яблока</button>
+        <button data-food="5">5 яблок</button>
+        <button data-food="10">10 яблок</button>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>🚪 Режим:</label>
+      <div class="buttons" id="modeGroup">
+        <button data-mode="walls" class="active">Со стенами</button>
+        <button data-mode="nowalls">Сквозь стены</button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn">▶ Начать игру</button>
+  </div>
+
+  <div class="game-area" id="gameArea">
+    <h1>🐍 Змейка</h1>
+    <div class="stats">
+      <div>Счёт: <span id="score">0</span></div>
+      <div>Рекорд: <span id="best">0</span></div>
+    </div>
+    <canvas id="game"></canvas>
+    <div class="hint">Управление: стрелки или WASD • P — пауза</div>
+    <div class="top-bar">
+      <button class="fullscreen-btn" id="fullscreenBtn">⛶ На весь экран</button>
+      <button class="back-btn" id="backBtn">← В меню</button>
+    </div>
+  </div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const gameArea = document.getElementById('gameArea');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const sizeRange = document.getElementById('sizeRange');
+const sizeValue = document.getElementById('sizeValue');
+const sizeValue2 = document.getElementById('sizeValue2');
+
+let CELL, COLS, ROWS;
+let snake, direction, nextDirection, foods, score, gameOver, speed, paused;
+let foodCount = 1;
+let mode = 'walls';
+let gameLoopId = null;
+let chosenSize = 20;
+let currentSkin = 'classic';
+let currentTheme = 'dark';
+
+// === ТЕМЫ ===
+const THEMES = {
+  dark:    { body: '#1a1a2e', canvas: '#16213e', border: '#0f3460', grid: 'rgba(255,255,255,0.03)', shadow: 'rgba(15, 52, 96, 0.8)' },
+  black:   { body: '#000000', canvas: '#0a0a0a', border: '#333333', grid: 'rgba(255,255,255,0.04)', shadow: 'rgba(80, 80, 80, 0.6)' },
+  forest:  { body: '#0d1f0d', canvas: '#1a3a1a', border: '#2d5a2d', grid: 'rgba(255,255,255,0.04)', shadow: 'rgba(45, 90, 45, 0.7)' },
+  sunset:  { body: '#2d1b3d', canvas: '#3d2050', border: '#6a2d7a', grid: 'rgba(255,255,255,0.04)', shadow: 'rgba(106, 45, 122, 0.7)' }
+};
+
+function applyTheme(name) {
+  const t = THEMES[name];
+  document.body.style.background = t.body;
+  canvas.style.background = t.canvas;
+  canvas.style.borderColor = t.border;
+  canvas.style.boxShadow = `0 0 30px ${t.shadow}`;
+  gameArea.style.background = t.body;
+}
+
+// === СКИНЫ ЗМЕЙКИ ===
+// Возвращает цвет для сегмента с учётом индекса и длины
+function getSnakeColor(index, total, skin) {
+  if (index === 0) {
+    // Голова
+    switch (skin) {
+      case 'classic': return '#a6e3a1';
+      case 'neon':    return '#ff79c6';
+      case 'fire':    return '#f9e2af';
+      case 'ice':     return '#e0f7ff';
+      case 'rainbow': return '#ff5555';
+    }
+  }
+
+  const t = index / total;
+
+  switch (skin) {
+    case 'classic': {
+      const g = Math.floor(200 - t * 80);
+      return `rgb(100, ${g}, 150)`;
+    }
+    case 'neon': {
+      // Розовый → фиолетовый
+      const r = Math.floor(255 - t * 60);
+      const g = Math.floor(121 - t * 40);
+      const b = Math.floor(198 + t * 30);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    case 'fire': {
+      // Жёлтый → оранжевый → красный
+      const r = 255;
+      const g = Math.floor(230 - t * 170);
+      const b = Math.floor(120 - t * 100);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    case 'ice': {
+      // Голубой → белый
+      const r = Math.floor(120 + t * 120);
+      const g = Math.floor(200 + t * 40);
+      const b = 255;
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+    case 'rainbow': {
+      // Плавный переход через все цвета радуги
+      const hue = (t * 360 + 0) % 360;
+      return `hsl(${hue}, 80%, 60%)`;
+    }
+  }
+  return '#a6e3a1';
+}
+
+function calcCell(size) {
+  if (size <= 15) return 30;
+  if (size <= 20) return 24;
+  if (size <= 25) return 20;
+  if (size <= 30) return 18;
+  if (size <= 40) return 15;
+  return 12;
+}
+
+function setupGroup(groupId, onSelect) {
+  const group = document.getElementById(groupId);
+  group.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    onSelect(btn);
+  });
+}
+
+setupGroup('sizeGroup', (btn) => {
+  chosenSize = +btn.dataset.size;
+  sizeRange.value = chosenSize;
+  sizeValue.textContent = chosenSize;
+  sizeValue2.textContent = chosenSize;
+});
+
+sizeRange.addEventListener('input', () => {
+  chosenSize = +sizeRange.value;
+  sizeValue.textContent = chosenSize;
+  sizeValue2.textContent = chosenSize;
+  document.querySelectorAll('#sizeGroup button').forEach(b => b.classList.remove('active'));
+});
+
+setupGroup('skinGroup', (btn) => {
+  currentSkin = btn.dataset.skin;
+});
+setupGroup('themeGroup', (btn) => {
+  currentTheme = btn.dataset.theme;
+  applyTheme(currentTheme);
+});
+setupGroup('foodGroup', (btn) => {
+  foodCount = +btn.dataset.food;
+});
+setupGroup('modeGroup', (btn) => {
+  mode = btn.dataset.mode;
+});
+
+function getBest() { return +(localStorage.getItem('snake_best') || 0); }
+function setBest(v) { localStorage.setItem('snake_best', v); }
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('menu').classList.add('hidden');
+  gameArea.classList.add('visible');
+  startGame();
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  if (gameLoopId) clearTimeout(gameLoopId);
+  if (document.fullscreenElement) document.exitFullscreen();
+  gameArea.classList.remove('fullscreen');
+  document.getElementById('menu').classList.remove('hidden');
+  gameArea.classList.remove('visible');
+});
+
+fullscreenBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    if (gameArea.requestFullscreen) gameArea.requestFullscreen();
+    else if (gameArea.webkitRequestFullscreen) gameArea.webkitRequestFullscreen();
+    else if (gameArea.msRequestFullscreen) gameArea.msRequestFullscreen();
+    gameArea.classList.add('fullscreen');
+    fullscreenBtn.textContent = '⛶ Выйти';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    gameArea.classList.remove('fullscreen');
+    fullscreenBtn.textContent = '⛶ На весь экран';
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    gameArea.classList.remove('fullscreen');
+    fullscreenBtn.textContent = '⛶ На весь экран';
+  }
+});
+
+function startGame() {
+  CELL = calcCell(chosenSize);
+  COLS = chosenSize;
+  ROWS = chosenSize;
+  canvas.width = CELL * COLS;
+  canvas.height = CELL * ROWS;
+
+  snake = [{x: Math.floor(COLS/2), y: Math.floor(ROWS/2)}];
+  direction = {x: 1, y: 0};
+  nextDirection = {x: 1, y: 0};
+  score = 0;
+  gameOver = false;
+  paused = false;
+  speed = 150;
+  foods = [];
+  scoreEl.textContent = 0;
+  bestEl.textContent = getBest();
+
+  applyTheme(currentTheme);
+  for (let i = 0; i < foodCount; i++) placeFood();
+  draw();
+  if (gameLoopId) clearTimeout(gameLoopId);
+  loop();
+}
+
+function placeFood() {
+  let tries = 0;
+  while (tries < 500) {
+    const f = {
+      x: Math.floor(Math.random() * COLS),
+      y: Math.floor(Math.random() * ROWS)
+    };
+    if (snake.some(s => s.x === f.x && s.y === f.y)) { tries++; continue; }
+    if (foods.some(s => s.x === f.x && s.y === f.y)) { tries++; continue; }
+    foods.push(f);
+    return;
+  }
+}
+
+function draw() {
+  const t = THEMES[currentTheme];
+  ctx.fillStyle = t.canvas;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  if (CELL >= 14) {
+    ctx.strokeStyle = t.grid;
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= COLS; i++) {
+      ctx.beginPath();
+      ctx.moveTo(i * CELL, 0);
+      ctx.lineTo(i * CELL, canvas.height);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0, i * CELL);
+      ctx.lineTo(canvas.width, i * CELL);
+      ctx.stroke();
+    }
+  }
+
+  // Яблоки
+  foods.forEach(f => {
+    ctx.fillStyle = '#f38ba8';
+    ctx.beginPath();
+    ctx.arc(f.x * CELL + CELL / 2, f.y * CELL + CELL / 2, Math.max(CELL / 2 - 2, 3), 0, Math.PI * 2);
+    ctx.fill();
+
+    // Блик на яблоке
+    if (CELL >= 16) {
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.beginPath();
+      ctx.arc(f.x * CELL + CELL / 2 - CELL / 6, f.y * CELL + CELL / 2 - CELL / 6, Math.max(CELL / 8, 1.5), 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  // Змейка
+  snake.forEach((seg, i) => {
+    ctx.fillStyle = getSnakeColor(i, snake.length, currentSkin);
+    ctx.fillRect(seg.x * CELL + 1, seg.y * CELL + 1, CELL - 2, CELL - 2);
+
+    // Глазки на голове
+    if (i === 0 && CELL >= 16) {
+      ctx.fillStyle = '#1e1e2e';
+      const eyeSize = Math.max(CELL / 8, 2);
+      const cx = seg.x * CELL + CELL / 2;
+      const cy = seg.y * CELL + CELL / 2;
+      const off = CELL / 5;
+
+      // Глазки зависят от направления
+      let ex1 = cx - off, ey1 = cy - off;
+      let ex2 = cx + off, ey2 = cy - off;
+      if (direction.x === -1 || direction.x === 1) {
+        ex1 = cx + direction.x * off;
+        ey1 = cy - off;
+        ex2 = cx + direction.x * off;
+        ey2 = cy + off;
+      } else if (direction.y === -1 || direction.y === 1) {
+        ex1 = cx - off;
+        ey1 = cy + direction.y * off;
+        ex2 = cx + off;
+        ey2 = cy + direction.y * off;
+      }
+
+      ctx.beginPath();
+      ctx.arc(ex1, ey1, eyeSize, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(ex2, ey2, eyeSize, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  });
+
+  if (paused && !gameOver) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#a6e3a1';
+    ctx.font = 'bold 40px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ПАУЗА', canvas.width / 2, canvas.height / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = '16px Arial';
+    ctx.fillText('Нажми P чтобы продолжить', canvas.width / 2, canvas.height / 2 + 35);
+  }
+
+  if (gameOver) {
+    ctx.fillStyle = 'rgba(0,0,0,0.75)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = '#f38ba8';
+    ctx.font = 'bold 40px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ИГРА ОКОНЧЕНА', canvas.width / 2, canvas.height / 2 - 25);
+    ctx.fillStyle = '#fff';
+    ctx.font = '20px Arial';
+    ctx.fillText('Счёт: ' + score, canvas.width / 2, canvas.height / 2 + 15);
+    ctx.fillText('Рекорд: ' + getBest(), canvas.width / 2, canvas.height / 2 + 45);
+    ctx.fillStyle = '#a6e3a1';
+    ctx.font = '16px Arial';
+    ctx.fillText('ПРОБЕЛ — заново • ESC — в меню', canvas.width / 2, canvas.height / 2 + 85);
+  }
+}
+
+function update() {
+  if (gameOver || paused) return;
+  direction = nextDirection;
+  const head = {x: snake[0].x + direction.x, y: snake[0].y + direction.y};
+
+  if (mode === 'walls') {
+    if (head.x < 0 || head.x >= COLS || head.y < 0 || head.y >= ROWS) {
+      gameOver = true; checkBest(); return;
+    }
+  } else {
+    head.x = (head.x + COLS) % COLS;
+    head.y = (head.y + ROWS) % ROWS;
+  }
+
+  if (snake.some(s => s.x === head.x && s.y === head.y)) {
+    gameOver = true; checkBest(); return;
+  }
+
+  snake.unshift(head);
+  const idx = foods.findIndex(f => f.x === head.x && f.y === head.y);
+  if (idx !== -1) {
+    score += 10;
+    scoreEl.textContent = score;
+    foods.splice(idx, 1);
+    placeFood();
+    if (speed > 60) speed -= 3;
+  } else {
+    snake.pop();
+  }
+}
+
+function checkBest() {
+  const best = getBest();
+  if (score > best) {
+    setBest(score);
+    bestEl.textContent = score;
+  }
+}
+
+function loop() {
+  update();
+  draw();
+  gameLoopId = setTimeout(loop, speed);
+}
+
+document.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+  if ((key === 'arrowup' || key === 'w' || key === 'ц') && direction.y === 0) {
+    nextDirection = {x: 0, y: -1};
+  } else if ((key === 'arrowdown' || key === 's' || key === 'ы') && direction.y === 0) {
+    nextDirection = {x: 0, y: 1};
+  } else if ((key === 'arrowleft' || key === 'a' || key === 'ф') && direction.x === 0) {
+    nextDirection = {x: -1, y: 0};
+  } else if ((key === 'arrowright' || key === 'd' || key === 'в') && direction.x === 0) {
+    nextDirection = {x: 1, y: 0};
+  }
+
+  if (key === 'p' || key === 'з') {
+    if (!gameOver) paused = !paused;
+  }
+  if (key === ' ' && gameOver) startGame();
+
+  if (key === 'escape') {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    if (gameLoopId) clearTimeout(gameLoopId);
+    gameArea.classList.remove('fullscreen');
+    document.getElementById('menu').classList.remove('hidden');
+    gameArea.classList.remove('visible');
+  }
+
+  if (['arrowup','arrowdown','arrowleft','arrowright',' '].includes(key)) {
+    e.preventDefault();
+  }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Ловец яблок 🍎</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1a2e;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+      user-select: none;
+    }
+    h1 { margin-bottom: 10px; font-size: 26px; }
+    .stats {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 15px;
+      font-size: 17px;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+    }
+    .stats span { color: #a6e3a1; font-weight: bold; }
+    .lives-display { font-size: 20px; letter-spacing: 3px; }
+    canvas {
+      background: #16213e;
+      border: 3px solid #0f3460;
+      border-radius: 10px;
+      box-shadow: 0 0 30px rgba(15, 52, 96, 0.8);
+      max-width: 100%;
+      max-height: 70vh;
+      touch-action: none;
+    }
+    .hint { margin-top: 15px; font-size: 14px; color: #888; text-align: center; line-height: 1.6; }
+
+    .menu {
+      background: #16213e;
+      border: 2px solid #0f3460;
+      border-radius: 15px;
+      padding: 30px 40px;
+      box-shadow: 0 0 40px rgba(15, 52, 96, 0.9);
+      text-align: center;
+      max-width: 550px;
+      width: 100%;
+    }
+    .menu h2 { font-size: 24px; margin-bottom: 25px; color: #a6e3a1; }
+    .option { margin-bottom: 20px; text-align: left; }
+    .option label { display: block; margin-bottom: 8px; font-size: 15px; color: #cdd6f4; }
+    .option .buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+    .option button {
+      flex: 1 1 auto;
+      min-width: 90px;
+      padding: 10px 12px;
+      background: #313244;
+      color: #cdd6f4;
+      border: 2px solid transparent;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .option button:hover { background: #45475a; }
+    .option button.active {
+      background: #89b4fa;
+      color: #1e1e2e;
+      font-weight: bold;
+      border-color: #a6e3a1;
+    }
+    .start-btn {
+      margin-top: 15px;
+      width: 100%;
+      padding: 15px;
+      background: #a6e3a1;
+      color: #1e1e2e;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: inherit;
+    }
+    .start-btn:hover { background: #94e2d5; transform: translateY(-2px); }
+    .game-area { display: none; }
+    .game-area.visible { display: flex; flex-direction: column; align-items: center; }
+    .menu.hidden { display: none; }
+
+    .top-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .back-btn, .fullscreen-btn {
+      padding: 8px 20px;
+      background: #45475a;
+      color: #cdd6f4;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .back-btn:hover, .fullscreen-btn:hover { background: #585b70; }
+    .fullscreen-btn { background: #89b4fa; color: #1e1e2e; font-weight: bold; }
+    .fullscreen-btn:hover { background: #74a8f0; }
+
+    .game-area.fullscreen {
+      position: fixed;
+      inset: 0;
+      background: #1a1a2e;
+      padding: 15px;
+      z-index: 9999;
+      justify-content: center;
+      overflow: auto;
+    }
+    .game-area.fullscreen canvas { max-height: 75vh; }
+  </style>
+</head>
+<body>
+
+  <div class="menu" id="menu">
+    <h2>🍎 Настройки игры</h2>
+
+    <div class="option">
+      <label>❤️ Количество жизней:</label>
+      <div class="buttons" id="livesGroup">
+        <button data-lives="1">1 жизнь</button>
+        <button data-lives="3" class="active">3 жизни</button>
+        <button data-lives="5">5 жизней</button>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>⚡ Скорость падения:</label>
+      <div class="buttons" id="speedGroup">
+        <button data-speed="1">Медленно</button>
+        <button data-speed="2" class="active">Средне</button>
+        <button data-speed="3">Быстро</button>
+        <button data-speed="4">Очень быстро</button>
+      </div>
+    </div>
+
+    <div class="option">
+      <label>💣 Частота бомб:</label>
+      <div class="buttons" id="bombGroup">
+        <button data-bomb="0">Без бомб</button>
+        <button data-bomb="1" class="active">Редко</button>
+        <button data-bomb="2">Часто</button>
+        <button data-bomb="3">Очень часто</button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="startBtn">▶ Начать игру</button>
+  </div>
+
+  <div class="game-area" id="gameArea">
+    <h1>🍎 Ловец яблок</h1>
+    <div class="stats">
+      <div>Счёт: <span id="score">0</span></div>
+      <div>Рекорд: <span id="best">0</span></div>
+      <div class="lives-display" id="livesDisplay">❤️❤️❤️</div>
+    </div>
+    <canvas id="game"></canvas>
+    <div class="hint">← → или A/D — двигать корзинку • P — пауза<br>📱 На телефоне — води пальцем по экрану</div>
+    <div class="top-bar">
+      <button class="fullscreen-btn" id="fullscreenBtn">⛶ На весь экран</button>
+      <button class="back-btn" id="backBtn">← В меню</button>
+    </div>
+  </div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const bestEl = document.getElementById('best');
+const livesDisplay = document.getElementById('livesDisplay');
+const gameArea = document.getElementById('gameArea');
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+
+const W = 500;
+const H = 600;
+canvas.width = W;
+canvas.height = H;
+
+let basket, items, score, lives, gameOver, paused;
+let livesMax = 3;
+let speedLevel = 2;
+let bombLevel = 1;
+let gameLoopId = null;
+let spawnCounter = 0;
+let spawnInterval = 45;
+let keys = { left: false, right: false };
+let running = false;
+
+const BASKET_SPEED = 7;
+const BASKET_W = 80;
+const BASKET_H = 50;
+const APPLE_R = 16;
+const BOMB_R = 16;
+
+function setupGroup(groupId, onSelect) {
+  const group = document.getElementById(groupId);
+  group.addEventListener('click', (e) => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+    group.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    onSelect(btn);
+  });
+}
+
+setupGroup('livesGroup', (btn) => { livesMax = +btn.dataset.lives; });
+setupGroup('speedGroup', (btn) => { speedLevel = +btn.dataset.speed; });
+setupGroup('bombGroup', (btn) => { bombLevel = +btn.dataset.bomb; });
+
+function getBest() { return +(localStorage.getItem('apples_best') || 0); }
+function setBest(v) { localStorage.setItem('apples_best', v); }
+
+document.getElementById('startBtn').addEventListener('click', () => {
+  document.getElementById('menu').classList.add('hidden');
+  gameArea.classList.add('visible');
+  startGame();
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
+  goToMenu();
+});
+
+function goToMenu() {
+  running = false;
+  if (gameLoopId) {
+    cancelAnimationFrame(gameLoopId);
+    gameLoopId = null;
+  }
+  if (document.fullscreenElement) document.exitFullscreen();
+  gameArea.classList.remove('fullscreen');
+  document.getElementById('menu').classList.remove('hidden');
+  gameArea.classList.remove('visible');
+}
+
+fullscreenBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    if (gameArea.requestFullscreen) gameArea.requestFullscreen();
+    else if (gameArea.webkitRequestFullscreen) gameArea.webkitRequestFullscreen();
+    gameArea.classList.add('fullscreen');
+    fullscreenBtn.textContent = '⛶ Выйти';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    gameArea.classList.remove('fullscreen');
+    fullscreenBtn.textContent = '⛶ На весь экран';
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) {
+    gameArea.classList.remove('fullscreen');
+    fullscreenBtn.textContent = '⛶ На весь экран';
+  }
+});
+
+function startGame() {
+  basket = { x: W / 2 - BASKET_W / 2, y: H - BASKET_H - 10, w: BASKET_W, h: BASKET_H };
+  items = [];
+  score = 0;
+  lives = livesMax;
+  gameOver = false;
+  paused = false;
+  spawnCounter = 0;
+  spawnInterval = getSpawnInterval();
+  running = true;
+
+  scoreEl.textContent = 0;
+  bestEl.textContent = getBest();
+  updateLivesDisplay();
+
+  keys = { left: false, right: false };
+
+  if (gameLoopId) cancelAnimationFrame(gameLoopId);
+  gameLoopId = requestAnimationFrame(loop);
+}
+
+function getSpawnInterval() {
+  return [0, 60, 45, 32, 22][speedLevel] || 45;
+}
+function getFallSpeed() {
+  return [0, 1.5, 2.5, 3.5, 4.5][speedLevel] || 2.5;
+}
+function getBombChance() {
+  return [0, 0.15, 0.25, 0.4][bombLevel] || 0.15;
+}
+
+function updateLivesDisplay() {
+  let s = '';
+  for (let i = 0; i < livesMax; i++) {
+    s += i < lives ? '❤️' : '🖤';
+  }
+  livesDisplay.textContent = s;
+}
+
+function spawnItem() {
+  const isBomb = Math.random() < getBombChance();
+  const x = APPLE_R + Math.random() * (W - APPLE_R * 2);
+  items.push({
+    x: x,
+    y: -APPLE_R,
+    vy: getFallSpeed(),
+    isBomb: isBomb,
+    rotation: 0,
+    rotationSpeed: (Math.random() - 0.5) * 0.1
+  });
+}
+
+function update() {
+  if (gameOver || paused) return;
+
+  if (keys.left) basket.x -= BASKET_SPEED;
+  if (keys.right) basket.x += BASKET_SPEED;
+  if (basket.x < 0) basket.x = 0;
+  if (basket.x + basket.w > W) basket.x = W - basket.w;
+
+  spawnCounter++;
+  if (spawnCounter >= spawnInterval) {
+    spawnCounter = 0;
+    spawnItem();
+  }
+
+  for (let i = items.length - 1; i >= 0; i--) {
+    const it = items[i];
+    it.y += it.vy;
+    it.rotation += it.rotationSpeed;
+
+    const bx = basket.x;
+    const by = basket.y;
+    const cx = it.x;
+    const cy = it.y;
+
+    // Столкновение с корзинкой
+    if (cy + APPLE_R > by && cy - APPLE_R < by + basket.h &&
+        cx > bx - APPLE_R && cx < bx + basket.w + APPLE_R) {
+      if (it.isBomb) {
+        lives--;
+        updateLivesDisplay();
+        if (lives <= 0) {
+          gameOver = true;
+          checkBest();
+        }
+      } else {
+        score += 10;
+        scoreEl.textContent = score;
+      }
+      items.splice(i, 1);
+      continue;
+    }
+
+    // Упал за экран
+    if (it.y > H + APPLE_R * 2) {
+      items.splice(i, 1);
+    }
+  }
+}
+
+function checkBest() {
+  const b = getBest();
+  if (score > b) {
+    setBest(score);
+    bestEl.textContent = score;
+  }
+}
+
+function drawApple(x, y, rotation) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.arc(2, 2, APPLE_R, 0, Math.PI * 2);
+  ctx.fill();
+
+  const grad = ctx.createRadialGradient(-APPLE_R/3, -APPLE_R/3, 2, 0, 0, APPLE_R);
+  grad.addColorStop(0, '#ff7a95');
+  grad.addColorStop(1, '#e63950');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, APPLE_R, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.beginPath();
+  ctx.arc(-APPLE_R/3, -APPLE_R/3, APPLE_R/4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#a6e3a1';
+  ctx.beginPath();
+  ctx.ellipse(APPLE_R/3, -APPLE_R - 2, 6, 4, -0.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#5c3a21';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(0, -APPLE_R + 3);
+  ctx.lineTo(2, -APPLE_R - 5);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawBomb(x, y, rotation) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rotation);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.arc(2, 2, BOMB_R, 0, Math.PI * 2);
+  ctx.fill();
+
+  const grad = ctx.createRadialGradient(-BOMB_R/3, -BOMB_R/3, 2, 0, 0, BOMB_R);
+  grad.addColorStop(0, '#666');
+  grad.addColorStop(1, '#111');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, BOMB_R, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.beginPath();
+  ctx.arc(-BOMB_R/3, -BOMB_R/3, BOMB_R/4, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#8a6d3b';
+  ctx.lineWidth = 2.5;
+  ctx.beginPath();
+  ctx.moveTo(0, -BOMB_R + 3);
+  ctx.quadraticCurveTo(5, -BOMB_R - 8, 8, -BOMB_R - 12);
+  ctx.stroke();
+
+  ctx.fillStyle = '#f9e2af';
+  ctx.beginPath();
+  ctx.arc(8, -BOMB_R - 12, 3, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = '#f38ba8';
+  ctx.beginPath();
+  ctx.arc(8, -BOMB_R - 12, 1.5, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawBasket(x, y, w, h) {
+  ctx.fillStyle = 'rgba(0,0,0,0.3)';
+  ctx.beginPath();
+  ctx.ellipse(x + w/2, y + h + 5, w/2, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.moveTo(x + 5, y);
+  ctx.lineTo(x + w - 5, y);
+  ctx.lineTo(x + w - 12, y + h);
+  ctx.lineTo(x + 12, y + h);
+  ctx.closePath();
+
+  const grad = ctx.createLinearGradient(x, y, x, y + h);
+  grad.addColorStop(0, '#d4a056');
+  grad.addColorStop(1, '#8b5a2b');
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(90, 60, 20, 0.5)';
+  ctx.lineWidth = 2;
+  for (let i = 1; i < 4; i++) {
+    const ty = y + h * (i / 4);
+    const leftX = x + 5 + (7) * (i / 4);
+    const rightX = x + w - 5 - (7) * (i / 4);
+    ctx.beginPath();
+    ctx.moveTo(leftX, ty);
+    ctx.lineTo(rightX, ty);
+    ctx.stroke();
+  }
+
+  ctx.fillStyle = '#b8813e';
+  ctx.beginPath();
+  ctx.ellipse(x + w/2, y, w/2, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = '#8b5a2b';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+}
+
+function draw() {
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
+  skyGrad.addColorStop(0, '#16213e');
+  skyGrad.addColorStop(1, '#0f3460');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.3)';
+  for (let i = 0; i < 30; i++) {
+    const sx = (i * 137) % W;
+    const sy = (i * 79) % (H - 100);
+    ctx.fillRect(sx, sy, 2, 2);
+  }
+
+  ctx.fillStyle = '#1a3a1a';
+  ctx.fillRect(0, H - 15, W, 15);
+  ctx.fillStyle = '#2d5a2d';
+  ctx.fillRect(0, H - 15, W, 4);
+
+  items.forEach(it => {
+    if (it.isBomb) drawBomb(it.x, it.y, it.rotation);
+    else drawApple(it.x, it.y, it.rotation);
+  });
+
+  drawBasket(basket.x, basket.y, basket.w, basket.h);
+
+  if (paused && !gameOver) {
+    ctx.fillStyle = 'rgba(0,0,0,0.7)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#a6e3a1';
+    ctx.font = 'bold 44px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ПАУЗА', W / 2, H / 2);
+    ctx.fillStyle = '#fff';
+    ctx.font = '16px Arial';
+    ctx.fillText('Нажми P чтобы продолжить', W / 2, H / 2 + 35);
+  }
+
+  if (gameOver) {
+    ctx.fillStyle = 'rgba(0,0,0,0.8)';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#f38ba8';
+    ctx.font = 'bold 44px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('ИГРА ОКОНЧЕНА', W / 2, H / 2 - 40);
+    ctx.fillStyle = '#fff';
+    ctx.font = '22px Arial';
+    ctx.fillText('Счёт: ' + score, W / 2, H / 2 + 5);
+    ctx.fillText('Рекорд: ' + getBest(), W / 2, H / 2 + 40);
+    ctx.fillStyle = '#a6e3a1';
+    ctx.font = '16px Arial';
+    ctx.fillText('ПРОБЕЛ — заново', W / 2, H / 2 + 85);
+    ctx.fillText('ESC — в меню', W / 2, H / 2 + 110);
+  }
+}
+
+function loop() {
+  if (!running) return;
+  update();
+  draw();
+  gameLoopId = requestAnimationFrame(loop);
+}
+
+// === УПРАВЛЕНИЕ ===
+document.addEventListener('keydown', (e) => {
+  const key = e.key.toLowerCase();
+
+  if (key === 'arrowleft' || key === 'a' || key === 'ф') keys.left = true;
+  if (key === 'arrowright' || key === 'd' || key === 'в') keys.right = true;
+
+  if (key === 'p' || key === 'з') {
+    if (!gameOver) paused = !paused;
+  }
+
+  if (key === ' ' && gameOver) startGame();
+
+  if (key === 'escape') {
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+      return;
+    }
+    goToMenu();
+  }
+
+  if (['arrowleft','arrowright',' '].includes(key)) {
+    e.preventDefault();
+  }
+});
+
+document.addEventListener('keyup', (e) => {
+  const key = e.key.toLowerCase();
+  if (key === 'arrowleft' || key === 'a' || key === 'ф') keys.left = false;
+  if (key === 'arrowright' || key === 'd' || key === 'в') keys.right = false;
+});
+
+function handlePointerMove(clientX) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const x = (clientX - rect.left) * scaleX;
+  basket.x = x - basket.w / 2;
+  if (basket.x < 0) basket.x = 0;
+  if (basket.x + basket.w > W) basket.x = W - basket.w;
+}
+
+canvas.addEventListener('mousemove', (e) => {
+  if (running && !gameOver && !paused && basket) handlePointerMove(e.clientX);
+});
+
+canvas.addEventListener('touchmove', (e) => {
+  if (running && !gameOver && !paused && basket) {
+    e.preventDefault();
+    handlePointerMove(e.touches[0].clientX);
+  }
+}, { passive: false });
+
+canvas.addEventListener('touchstart', (e) => {
+  if (running && !gameOver && !paused && basket) {
+    e.preventDefault();
+    handlePointerMove(e.touches[0].clientX);
+  }
+}, { passive: false });
+</script>
+
+</body>
+</html>
