@@ -641,12 +641,9 @@
       if (e.key === 'Enter') modalConfirm.click();
     });
 
-    // ============================================
-    // СМЕНА ПАРОЛЯ
-    // ============================================
+    // === СМЕНА ПАРОЛЯ ===
     document.getElementById('changePassBtn').addEventListener('click', () => {
       const activeName = Accounts.getActive();
-
       openModal({
         title: '🔑 Смена пароля',
         text: 'Аккаунт: ' + activeName,
@@ -658,34 +655,18 @@
         confirmText: '💾 Сохранить',
         confirmClass: 'primary',
         onConfirm: (vals) => {
-          if (!vals.oldPass) {
-            modalError.textContent = '❌ Введи текущий пароль';
-            return;
-          }
-          if (!vals.newPass1 || vals.newPass1.length < 3) {
-            modalError.textContent = '❌ Новый пароль мин. 3 символа';
-            return;
-          }
-          if (vals.newPass1 !== vals.newPass2) {
-            modalError.textContent = '❌ Новые пароли не совпадают';
-            return;
-          }
-
+          if (!vals.oldPass) { modalError.textContent = '❌ Введи текущий пароль'; return; }
+          if (!vals.newPass1 || vals.newPass1.length < 3) { modalError.textContent = '❌ Новый пароль мин. 3 символа'; return; }
+          if (vals.newPass1 !== vals.newPass2) { modalError.textContent = '❌ Новые пароли не совпадают'; return; }
           const res = Accounts.changePassword(activeName, vals.oldPass, vals.newPass1);
-          if (!res.ok) {
-            modalError.textContent = '❌ ' + res.msg;
-            return;
-          }
-
+          if (!res.ok) { modalError.textContent = '❌ ' + res.msg; return; }
           closeModal();
           showToast('✅ Пароль изменён');
         }
       });
     });
 
-    // ============================================
-    // СБРОС РЕКОРДОВ
-    // ============================================
+    // === СБРОС РЕКОРДОВ ===
     document.getElementById('resetBtn').addEventListener('click', () => {
       openModal({
         title: '🗑 Сбросить рекорды?',
@@ -709,12 +690,9 @@
       });
     });
 
-    // ============================================
-    // УДАЛЕНИЕ АККАУНТА (только с паролем!)
-    // ============================================
+    // === УДАЛЕНИЕ АККАУНТА ===
     document.getElementById('deleteAccountBtn').addEventListener('click', () => {
       const activeName = Accounts.getActive();
-
       openModal({
         title: '❌ Удалить аккаунт?',
         text: 'Аккаунт «' + activeName + '» и все его рекорды будут удалены навсегда.\nВведи пароль для подтверждения:',
@@ -723,20 +701,11 @@
         ],
         confirmText: '❌ Удалить',
         onConfirm: (vals) => {
-          if (!vals.delPass) {
-            modalError.textContent = '❌ Введи пароль';
-            return;
-          }
-
+          if (!vals.delPass) { modalError.textContent = '❌ Введи пароль'; return; }
           const res = Accounts.remove(activeName, vals.delPass);
-          if (!res.ok) {
-            modalError.textContent = '❌ ' + res.msg;
-            return;
-          }
-
+          if (!res.ok) { modalError.textContent = '❌ ' + res.msg; return; }
           closeModal();
           showToast('🗑 Аккаунт удалён');
-
           loggedIn = false;
           profileScreen.style.display = 'none';
           loginScreen.style.display = 'block';
@@ -748,11 +717,21 @@
       });
     });
 
-    // ============================================
-    // СТАТИСТИКА
-    // ============================================
+    // === СТАТИСТИКА ===
     function updateStats() {
       if (!window.SiteTracker) return;
-
       document.getElementById('statSession').textContent = SiteTracker.formatTime(SiteTracker.getSessionSeconds());
-     
+      document.getElementById('statTotal').textContent = SiteTracker.formatTime(SiteTracker.getTotalSeconds());
+      document.getElementById('statVisits').textContent = SiteTracker.getVisits();
+      const first = SiteTracker.getFirstVisit();
+      if (first) {
+        const d = new Date(first);
+        document.getElementById('statFirst').textContent =
+          d.toLocaleDateString('ru-RU') + ' ' + d.toLocaleTimeString('ru-RU', {hour: '2-digit', minute: '2-digit'});
+      }
+    }
+    setInterval(updateStats, 1000);
+
+    // === ТОСТ ===
+    function showToast(text, isError) {
+      const toast
